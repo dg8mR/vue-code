@@ -1,0 +1,464 @@
+<script setup>
+import { ref, reactive, computed } from 'vue'
+
+const state = reactive({
+  enemy: {
+    hp: 10,
+    lvl: 1,
+    maxhp: 10,
+    ex: 0,
+    attack: 0,
+  },
+  player: {
+    hp: 100,
+    lvl: 1,
+    maxhp: 100,
+    ex: 0,
+    attack: 5, // Начальное значение атаки
+    lowk: 0,   // Ловкость
+    inte: 0,   // Интеллект
+    points: 10, // Точки умений (для повышения навыков)
+    yclun: "Уклонился",
+    playing: false,
+    class:"",
+    
+  },
+  log: "",
+  clog:"",
+  
+})
+
+// Выбранная вкладка
+const activeTab = ref('game') // По умолчанию выбрана вкладка "Игра"
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+// Функция атаки игрока по боссу
+function playerAttack() {
+  if (activeTab.value !== 'game' || state.player.hp <= 0) return
+  state.player.attack = getRandomInt(state.player.lvl, state.player.lvl * 2)
+  state.enemy.hp -= state.player.attack
+  if (state.enemy.hp <= 0) {
+    state.player.ex += state.enemy.lvl
+    state.enemy.lvl += 1
+    state.enemy.hp = state.enemy.lvl * 10
+    state.enemy.maxhp = state.enemy.hp
+    state.player.points += 5
+    state.player.hp = state.player.maxhp
+    if (state.player.ex >= 10) {
+      state.player.lvl += 1
+      state.player.ex = 0
+    }
+  }
+}
+
+// Функция атаки босса по игроку
+function bossAttack() {
+  if (activeTab.value !== 'game' || state.player.hp <= 0) return;
+  state.enemy.attack = getRandomInt(state.enemy.lvl, state.enemy.lvl * 2);
+  if(yclon()){
+    state.player.yclun = "Уклонился"
+  }
+  else{
+    state.player.hp -= state.enemy.attack;
+    state.player.yclun = "не уклонился"
+  }
+    
+  if (state.player.hp <= 0) {
+    state.player.hp = 0; // Убедимся, что здоровье не становится отрицательным
+    //restart()
+    setTimeout(restart, 3000);
+    
+  }
+}
+
+setInterval(bossAttack, 1000)
+setInterval(playerAttack, 1000)
+// Добавляем классы для изменения цвета полоски здоровья
+const enemyHealthClass = computed(() => {
+  if (state.enemy.hp / state.enemy.maxhp < 0.2) return 'critical-health'
+  if (state.enemy.hp / state.enemy.maxhp < 0.5) return 'low-health'
+  return ''
+})
+
+const playerHealthClass = computed(() => {
+  if (state.player.hp / state.player.maxhp < 0.2) return 'critical-health'
+  if (state.player.hp / state.player.maxhp < 0.5) return 'low-health'
+  return ''
+})
+
+// Функция для увеличения навыков
+function increaseSkill(skill) {
+  if (state.player.points > 0) {
+    state.player[skill] += 1
+    state.player.points -= 1
+  } else {
+    alert('Недостаточно очков умений!')
+  }
+}
+function restart(){
+  state.enemy.hp = state.enemy.maxhp
+  state.player.hp = state.player.maxhp
+  state.player.maxhp = 100
+  state.enemy.maxhp = 100
+  state.player.ex = 0
+  state.enemy.ex = 0
+  state.player.lvl = 1
+  state.enemy.lvl = 1
+}
+function yclon(){
+  const pers = Math.random()
+  state.log = String(pers)
+   if(pers < 0.5 + state.player.lowk * 0.1){
+    return true
+   }
+   else{
+    return false
+   }
+
+ 
+}
+</script>
+
+<template>
+<div class="select" v-if="state.player.playing == false">
+  <form class="game-setup">
+    <!-- Выбор класса персонажа -->
+    <div class="character-class">
+      
+      <select id="class-select" name="characterClass" v-model="state.player.class">
+        <option value="Воин">Воин</option>
+        <option value="Лучник">Лучник</option>
+        <option value="Маг">Маг</option>
+      </select>
+      <p style="color:black">Выбрано:{{state.player.class}}</p>
+    </div>
+
+    <!-- Выбор уровня сложности -->
+    <div class="difficulty-level">
+      <div class="radio-group" >
+        <label>
+          <input type="radio" name="difficulty" value="Легко" checked v-model="state.clog"> Легко
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="Средне" v-model="state.clog"> Средне
+        </label>
+        <label>
+          <input type="radio" name="difficulty" value="Сложно" v-model="state.clog"> Сложно
+        </label>
+      </div>
+     <p style="color:black">Выбрано:{{state.clog}}</p>
+      
+    </div>
+
+    <!-- Кнопка начала игры -->
+    <button type="button" @click="state.player.playing = true" class="start-button">
+      Начать игру
+    </button>
+  </form>
+</div>
+  <div class="container" v-if="state.player.playing==true">
+    <!-- Экран смерти -->
+    <div v-if="state.player.hp <= 0" class="death-screen">
+      <h1>Ты умер</h1>
+    </div>
+    <!-- Основной контент игры -->
+    <div v-else>
+      <!-- Вкладки -->
+      <div class="tabs">
+        <button
+          :class="{ active: activeTab === 'game' }"
+          @click="activeTab = 'game'"
+        >
+          Игра
+        </button>
+        <button
+          :class="{ active: activeTab === 'skills' }"
+          @click="activeTab = 'skills'"
+        >
+          Навыки
+        </button>
+        <button
+          :class="{ active: activeTab === 'shop' }"
+          @click="activeTab = 'shop'"
+        >
+          Магазин
+        </button>
+      </div>
+
+      <!-- Содержимое вкладок -->
+      <div v-if="activeTab === 'game'" class="tab-content">
+        <h3 class="enemy-label">Враг</h3>
+        <button @click="playerAttack" class="attack-button">
+          👻
+        </button>
+        <div class="enemy-stats">
+          <p>Урон: {{ state.enemy.attack }}</p>
+          <p>HP: {{ state.enemy.hp }} / {{ state.enemy.maxhp }}</p>
+          <div class="health-bar">
+            <div
+              class="health-fill"
+              :style="{ width: `${(state.enemy.hp / state.enemy.maxhp) * 100}%` }"
+              :class="enemyHealthClass"
+            ></div>
+          </div>
+          <p>Уровень: {{ state.enemy.lvl }}</p>
+        </div>
+        <h3 class="player-label">Персонаж</h3>
+        <div class="stats">
+          <div class="player-stats">
+            <p>Урон: {{ state.player.attack }}</p>
+            <p>{{state.player.yclun}}</p>
+            <p>HP: {{ state.player.hp }} / {{ state.player.maxhp }}</p>
+            <div class="health-bar">
+              <div
+                class="health-fill"
+                :style="{ width: `${(state.player.hp / state.player.maxhp) * 100}%` }"
+                :class="playerHealthClass"
+              ></div>
+            </div>
+            <p>Уровень: {{ state.player.lvl }}</p>
+            <p>Опыт: {{ state.player.ex }}</p>
+            <p>{{state.log}}</p>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="activeTab === 'skills'" class="tab-content">
+        <h3>Навыки</h3>
+        <p>Доступные очки умений: {{ state.player.points }}</p>
+        <ul>
+          <li>
+            <span>Повышение HP: {{ state.player.maxhp }}</span>
+            <button @click="increaseSkill('maxhp')">+</button>
+          </li>
+          <li>
+            <span>Ловкость: {{ state.player.lowk }}</span>
+            <button @click="increaseSkill('lowk')">+</button>
+          </li>
+          <li>
+            <span>Интеллект: {{ state.player.inte }}</span>
+            <button @click="increaseSkill('inte')">+</button>
+          </li>
+        </ul>
+      </div>
+
+      <div v-if="activeTab === 'shop'" class="tab-content">
+        <h3>Магазин</h3>
+        <p>Здесь можно покупать предметы.</p>
+        <ul>
+          <li>Зелье здоровья: 10 монет</li>
+          <li>Усиление атаки: 20 монет</li>
+          <li>Усиление защиты: 30 монет</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+/* Общий стиль */
+body {
+  background-color: #18171c;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  background-color: #2c2c2c;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 400px;
+  margin: 50px auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Экран смерти */
+.death-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 48px;
+  font-weight: bold;
+  z-index: 999;
+}
+
+/* Вкладки */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  background-color: #3c3c3c;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.tabs button.active {
+  background-color: #4caf50;
+}
+
+.tabs button:hover {
+  background-color: #5c5c5c;
+}
+
+/* Содержимое вкладок */
+.tab-content {
+  text-align: center;
+
+}
+
+/* Круглая кнопка */
+.attack-button {
+  background-color: #000; /* Черный фон */
+  border: none;
+  border-radius: 50%; /* Круглая форма */
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(to bottom, #000, #002f6c); /* Черный с синим оттенком */
+  font-size: 50px;
+}
+
+.attack-button:hover {
+  background: linear-gradient(to bottom, #002f6c, #000); /* Изменение градиента при наведении */
+}
+
+/* Полоска здоровья */
+.health-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 5px 0;
+}
+
+.health-fill {
+  height: 100%;
+  background-color: #4caf50; /* Зеленый цвет для здоровья */
+  transition: width 0.3s ease;
+}
+
+.health-fill.low-health {
+  background-color: #ff9800; /* Оранжевый цвет */
+}
+
+.health-fill.critical-health {
+  background-color: #f44336; /* Красный цвет */
+}
+
+/* Стили для списка навыков */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+
+button {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+/* Основной стиль формы */
+/* Основной стиль формы */
+.game-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* Стиль заголовков */
+.character-class label,
+.difficulty-level label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Стиль выпадающего списка */
+#class-select {
+  padding: 0.5rem;
+  border: 1px solid #000;
+  border-radius: 4px;
+  color:#000
+}
+
+/* Стиль радиокнопок */
+.radio-group {
+  display: flex;
+  gap: 1rem;
+  color:#000
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color:#000
+}
+
+/* Стиль кнопки */
+.start-button {
+  padding: 0.75rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.start-button:hover {
+  background-color: #0056b3;
+}
+
+</style>
