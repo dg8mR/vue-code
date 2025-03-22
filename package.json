@@ -25,6 +25,7 @@
     "root": true,
     "env": {
       "node": true
+
     },
     "extends": [
       "plugin:vue/vue3-essential",
@@ -33,7 +34,11 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+   "no-unused-vars": 0,
+   "@typescript-eslint/no-unused-vars": 0,
+   "vue/multi-word-component-name": "off"
+  }
   },
   "browserslist": [
     "> 1%",
@@ -41,4 +46,5 @@
     "not dead",
     "not ie 11"
   ]
+  
 }

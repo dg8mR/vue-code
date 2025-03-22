@@ -1,19 +1,18 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import MenuComponent from '../components/MenuComponent.vue'; // Обновленный путь
-import GameComponent from '../components/GameComponent.vue'; // Обновленный путь
-import SkillsComponent from '../components/SkillsComponent.vue'; // Обновленный путь
-import ShopComponent from '../components/ShopComponent.vue'; // Обновленный путь
+import { createRouter, createWebHistory } from 'vue-router'
+import Game from '../components/GameC.vue'
+import Skills from '../components/SkillsC.vue'
+import Shop from '../components/ShopC.vue'
 
 const routes = [
-  { path: '/', component: MenuComponent },
-  { path: '/game', component: GameComponent },
-  { path: '/skills', component: SkillsComponent },
-  { path: '/shop', component: ShopComponent },
-];
+  { path: '/', redirect: '/game' }, // Перенаправление на вкладку "Игра" по умолчанию
+  { path: '/game', component: Game },
+  { path: '/skills', component: Skills },
+  { path: '/shop', component: Shop }
+]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
-});
+  routes
+})
 
-export default router;
+export default router
