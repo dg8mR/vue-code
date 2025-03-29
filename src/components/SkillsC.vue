@@ -5,15 +5,15 @@
     <ul>
       <li>
         <span>Повышение HP: {{ state.player.maxhp }}</span>
-        <button @click="increaseSkill('maxhp')">+</button>
+        <button @click="increaseSkill('maxhp')" :disabled="state.player.points <= 0" class="btnd">+</button>
       </li>
       <li>
         <span>Ловкость: {{ state.player.lowk }}</span>
-        <button @click="increaseSkill('lowk')">+</button>
+        <button @click="increaseSkill('lowk')" :disabled="state.player.points <= 0" class="btnd">+</button>
       </li>
       <li>
         <span>Интеллект: {{ state.player.inte }}</span>
-        <button @click="increaseSkill('inte')">+</button>
+        <button @click="increaseSkill('inte')" :disabled="state.player.points <= 0" class="btnd">+</button>
       </li>
     </ul>
   </div>
@@ -26,12 +26,14 @@ function increaseSkill(skill) {
   if (state.player.points > 0) {
     state.player[skill] += 1
     state.player.points -= 1
-  } else {
-    alert('Недостаточно очков умений!')
   }
 }
+
 </script>
 
 <style scoped>
 /* Стили остаются такими же, как в вашем исходном коде */
+.btnd:disabled{
+  background-color:#333;
+}
 </style>
