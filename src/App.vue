@@ -1,14 +1,17 @@
 <template>
   <div class="container">
     <!-- Выбор класса -->
-    <div class="select">
+    <div class="select" v-if="state.start == 0">
       <select>
         <option>Воин</option>
         <option>Лучник</option>
         <option>Маг</option>
-      </select>
-    </div>
 
+
+      </select>
+      <button @click="start">Начать</button>
+    </div>
+    <div v-if="state.start == 1">
     <!-- Экран смерти -->
     <DeathScreen v-if="state.player.hp <= 0" />
 
@@ -40,6 +43,7 @@
       <router-view />
     </div>
   </div>
+  </div>
 </template>
 
 <script setup>
@@ -65,10 +69,23 @@ const state = reactive({
     points: 10,
     yclun: "Уклонился",
   },
-  log: ""
+  log: "",
+  start: 0
 })
+
+function start(){
+    state.start += 1
+}
 </script>
 
 <style scoped>
 /* Стили остаются такими же, как в вашем исходном коде */
+.select button{
+  position: absolute;
+  background-color: #ff0000;
+  width: 100px;
+  height: 100px;
+  top:200px;
+  left:600px;
+}
 </style>
