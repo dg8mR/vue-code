@@ -41,6 +41,17 @@
 import { computed } from 'vue'
 import { state } from '../store/index.js'
 
+function tick() {
+  playerAttack();
+  enemyAttack();
+}
+
+function enemyAttack(){
+  state.player.hp -= 1;
+}
+
+setInterval(tick, 1000);
+
 // Логика атаки игрока и босса
 function playerAttack() {
   if (state.player.hp <= 0) return
