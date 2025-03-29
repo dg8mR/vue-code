@@ -4,8 +4,8 @@
     <p>Доступные очки умений: {{ state.player.points }}</p>
     <ul>
       <li>
-        <span>Повышение HP: {{ state.player.maxhp }}</span>
-        <button @click="increaseSkill('maxhp')" :disabled="state.player.points <= 0" class="btnd">+</button>
+        <span>Повышение Силы: {{ state.player.lvl }}</span>
+        <button @click="increaseSkill('lvl')" :disabled="state.player.points <= 0" class="btnd">+</button>
       </li>
       <li>
         <span>Ловкость: {{ state.player.lowk }}</span>

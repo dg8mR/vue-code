@@ -37,6 +37,12 @@
         >
           Магазин
         </button>
+        <button
+          :class="{ active: $route.path === '/ekip' }"
+          @click="$router.push('/ekip')"
+        >
+          Экипировка
+        </button>
       </div>
 
       <!-- Маршрутизация -->
@@ -68,6 +74,15 @@ const state = reactive({
     inte: 0,
     points: 10,
     yclun: "Уклонился",
+  },
+  equip:["","","","","",""],
+  equip_V: {
+    head:'',
+    body:'',
+    foot:'',
+    armR:'',
+    armL:'',
+    pois:'',
   },
   log: "",
   start: 0

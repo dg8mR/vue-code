@@ -19,5 +19,14 @@ export const state = reactive({
     points: 10,
     yclun: "Уклонился",
   },
+  equip:["","","","","",""],
+  equip_V: {
+    head:'',
+    body:'',
+    foot:'',
+    armR:'',
+    armL:'',
+    pois:'',
+  },
   log: ""
 })
